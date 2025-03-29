@@ -1,6 +1,7 @@
 body {
    background-color: #d3b5e5;
    font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
+   transition: background-color 0.3s ease-in-out;
  }
  
  .labels {
@@ -13,6 +14,7 @@ body {
    color: #4a285d;
    word-wrap: break-word;
    margin-bottom: 50px;
+   animation: fadeIn 1s ease-in-out;
  }
  
  .frame {
@@ -20,6 +22,7 @@ body {
    padding: 5px 0px;
    width: 56px;
    border: 2px solid #4a285d;
+   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
  }
  
  .btn {
@@ -33,13 +36,22 @@ body {
    font-size: 10px;
    border: 0px;
    cursor: pointer;
-   border: 0px;
+   transition: background-color 0.2s ease-in-out;
+ }
+ 
+ .btn:hover {
+   background-color: #5a326d;
  }
  
  .btn-rounded {
    width: 50px;
    height: 50px;
    border-radius: 50%;
+   transition: transform 0.2s ease-in-out;
+ }
+ 
+ .btn-rounded:hover {
+   transform: scale(1.1);
  }
  
  .fa {
@@ -67,6 +79,7 @@ body {
    height: 448px;
    margin: 10px auto;
    border: 2px solid #4a285d;
+   animation: popIn 0.5s ease-out;
  }
  
  #stats {
@@ -90,6 +103,7 @@ body {
    color: #d3b5e5;
    z-index: 2;
    text-align: center;
+   animation: slideDown 0.5s ease-in-out;
  }
  
  #message {
@@ -111,6 +125,7 @@ body {
    background-color: #d3b5e5;
    width: 28px;
    height: 28px;
+   transition: background-color 0.2s ease-in-out;
  }
  
  .empty {
@@ -133,3 +148,20 @@ body {
    height: 8px;
    margin: 3px;
  }
+
+ @keyframes fadeIn {
+   from { opacity: 0; }
+   to { opacity: 1; }
+ }
+ 
+ @keyframes popIn {
+   from { transform: scale(0.8); opacity: 0; }
+   to { transform: scale(1); opacity: 1; }
+ }
+ 
+ @keyframes slideDown {
+   from { transform: translate(-50%, -60%); opacity: 0; }
+   to { transform: translate(-50%, -50%); opacity: 1; }
+ }
+
+ 
