@@ -13,7 +13,7 @@ class Block {
     let block = document.createElement("div");
     block.setAttribute("class", "block");
     $(block).append(
-      "<div class='inner-tile'><div class='inner-inner-tile'></div></div>"
+      "<div class='inner-tile'><div class='inner-inner-tile'></div></div>",
     );
     this.element = block;
   }
@@ -25,7 +25,7 @@ class Block {
   render() {
     $(this.element).css({
       left: this.y * $(this.element).innerWidth() + "px",
-      top: this.x * $(this.element).innerHeight() + "px"
+      top: this.x * $(this.element).innerHeight() + "px",
     });
   }
 
@@ -55,7 +55,7 @@ class Block {
 
   flash() {
     return window.animatelo.flash(this.element, {
-      duration: 500
+      duration: 500,
     });
   }
 
@@ -87,8 +87,8 @@ class Shape {
 
   fallingPositions() {
     return this.blocks
-      .map(b => b.getPosition())
-      .map(p => new Position(p.x + 1, p.y));
+      .map((b) => b.getPosition())
+      .map((p) => new Position(p.x + 1, p.y));
   }
 
   fall() {
@@ -98,11 +98,11 @@ class Shape {
   }
 
   rightPositions() {
-    return this.blocks.map(b => b.rightPosition());
+    return this.blocks.map((b) => b.rightPosition());
   }
 
   leftPositions() {
-    return this.blocks.map(b => b.leftPosition());
+    return this.blocks.map((b) => b.leftPosition());
   }
 
   moveRight() {
@@ -162,16 +162,14 @@ class LShape extends Shape {
   }
 
   rotate() {
-    let blocks = this.rotatePositions().map(p => new Block(p.x, p.y));
+    let blocks = this.rotatePositions().map((p) => new Block(p.x, p.y));
     this.clear();
     this.addBlocks(blocks);
     this.position = this.getNextPosition();
   }
 
   rotatePositions() {
-    let pos = this.getBlocks()
-      .shift()
-      .getPosition();
+    let pos = this.getBlocks().shift().getPosition();
     let x = pos.x;
     let y = pos.y;
     let positions = [];
@@ -229,16 +227,14 @@ class TShape extends Shape {
   }
 
   rotate() {
-    let blocks = this.rotatePositions().map(p => new Block(p.x, p.y));
+    let blocks = this.rotatePositions().map((p) => new Block(p.x, p.y));
     this.clear();
     this.addBlocks(blocks);
     this.position = this.getNextPosition();
   }
 
   rotatePositions() {
-    let pos = this.getBlocks()
-      .shift()
-      .getPosition();
+    let pos = this.getBlocks().shift().getPosition();
     let x = pos.x;
     let y = pos.y;
     let positions = [];
@@ -296,16 +292,14 @@ class ZShape extends Shape {
   }
 
   rotate() {
-    let blocks = this.rotatePositions().map(p => new Block(p.x, p.y));
+    let blocks = this.rotatePositions().map((p) => new Block(p.x, p.y));
     this.clear();
     this.addBlocks(blocks);
     this.position = this.getNextPosition();
   }
 
   rotatePositions() {
-    let pos = this.getBlocks()
-      .shift()
-      .getPosition();
+    let pos = this.getBlocks().shift().getPosition();
     let x = pos.x;
     let y = pos.y;
     let positions = [];
@@ -347,16 +341,14 @@ class Line extends Shape {
   }
 
   rotate() {
-    let blocks = this.rotatePositions().map(p => new Block(p.x, p.y));
+    let blocks = this.rotatePositions().map((p) => new Block(p.x, p.y));
     this.clear();
     this.addBlocks(blocks);
     this.position = this.getNextPosition();
   }
 
   rotatePositions() {
-    let pos = this.getBlocks()
-      .shift()
-      .getPosition();
+    let pos = this.getBlocks().shift().getPosition();
     let x = pos.x;
     let y = pos.y;
     let positions = [];
@@ -396,6 +388,7 @@ class Board {
     this.loopIntervalFast = parseInt(1000 / 27);
     this.init();
     this.score = 0;
+    this.paused = false;
   }
 
   setScore(value) {
@@ -408,18 +401,18 @@ class Board {
   }
 
   init() {
-    $(".empty").each(function(index, ele) {
+    $(".empty").each(function (index, ele) {
       let x = parseInt(index / 10);
       let y = index % 10;
       $(ele).css({
         left: y * $(ele).innerWidth() + "px",
-        top: x * $(ele).innerHeight() + "px"
+        top: x * $(ele).innerHeight() + "px",
       });
     });
     $("#message").text("Tetris");
     window.animatelo.flash("#new-game", {
       duration: 2500,
-      iterations: Infinity
+      iterations: Infinity,
     });
   }
 
@@ -439,13 +432,35 @@ class Board {
   }
 
   initGameLoop(value) {
+    if (this.paused) {
+      return;
+    }
     if (this.interval) {
       clearInterval(this.interval);
     }
     let ref = this;
-    this.interval = setInterval(function() {
+    this.interval = setInterval(function () {
       ref.gameLoop();
     }, value);
+  }
+
+  pauseGame() {
+    if (this.gameOver) {
+      return;
+    }
+    this.paused = !this.paused;
+    if (this.paused) {
+      if (this.interval) {
+        clearInterval(this.interval);
+        this.interval = undefined;
+      }
+      $("#banner").show();
+      $("#message").text("PAUSED");
+      $("#new-game").text("Click Pause to resume");
+    } else {
+      $("#banner").hide();
+      this.initGameLoop(this.loopInterval);
+    }
   }
 
   gameLoop() {
@@ -519,7 +534,7 @@ class Board {
       if (blocks.length == 10) {
         let ref = this;
         this.removeBlocks(blocks);
-        this.flashBlocks(blocks, function() {
+        this.flashBlocks(blocks, function () {
           ref.destroyBlocks(blocks);
           ref.fallBlocks(x);
           ref.setScore(ref.getScore() + 10);
@@ -643,6 +658,7 @@ class Board {
   }
 
   leftKeyPress() {
+    if (this.paused) return;
     for (let shape of this.shapes) {
       if (
         this.arePositonsWithinBoard(shape.leftPositions()) &&
@@ -655,6 +671,7 @@ class Board {
   }
 
   rotate() {
+    if (this.paused) return;
     for (let shape of this.shapes) {
       if (
         this.arePositonsWithinBoard(shape.rotatePositions()) &&
@@ -667,6 +684,7 @@ class Board {
   }
 
   rightKeyPress() {
+    if (this.paused) return;
     for (let shape of this.shapes) {
       if (
         this.arePositonsWithinBoard(shape.rightPositions()) &&
@@ -693,7 +711,7 @@ class Board {
 
 let board = new Board();
 
-$(document).keydown(function(e) {
+$(document).keydown(function (e) {
   switch (e.which) {
     case 37: // left
       board.leftKeyPress();
@@ -715,6 +733,10 @@ $(document).keydown(function(e) {
       board.newGame();
       break;
 
+    case 80: // p
+      board.pauseGame();
+      break;
+
     default:
       console.log(e.which);
       break; // exit this handler for other keys
@@ -722,23 +744,26 @@ $(document).keydown(function(e) {
   e.preventDefault(); // prevent the default action (scroll / move caret)
 });
 
-$("#new-game").click(function() {
+$("#new-game").click(function () {
   board.newGame();
 });
 
-$("#down").click(function() {
+$("#down").click(function () {
   board.downKeyPress();
 });
 
-$("#rotate").click(function() {
+$("#rotate").click(function () {
   board.upKeyPress();
 });
 
-$("#left").click(function() {
+$("#left").click(function () {
   board.leftKeyPress();
 });
 
-$("#right").click(function() {
+$("#right").click(function () {
   board.rightKeyPress();
 });
 
+$("#pause").click(function () {
+  board.pauseGame();
+});
